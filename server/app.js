@@ -83,7 +83,6 @@ app.post('/signup', (req, res, next) => {
   // check to see if user exists
   models.Users.get({ username: user.username })
     .then(results => {
-      console.log('results--------', results);
       if (results === undefined) {
         models.Users.create(user);
         res.redirect('/');
@@ -96,7 +95,29 @@ app.post('/signup', (req, res, next) => {
     });
 });
 
+app.post('/login', (req, res, next) => {
+  var user = req.body; // stores user data
 
+  models.Users.get({ username: user.username })
+    .then(results => {
+      if (results === undefined) {
+        res.redirect('/login');
+      } else {
+        // validate password since user does exist
+        var isPasswordCorrect = models.Users.compare(user.password, results.password, results.salt);
+    
+        if (isPasswordCorrect) {
+          res.redirect('/');
+        } else {
+          res.redirect('/login');
+        }
+      }
+    })
+    .catch(err => {
+      console.error('error', err);
+    });
+
+});
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
 // assume the route is a short code and try and handle it here.
