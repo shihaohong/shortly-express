@@ -77,7 +77,24 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.post('/signup', (req, res, next) => {
+  var user = req.body; // stores user data
 
+  // check to see if user exists
+  models.Users.get({ username: user.username })
+    .then(results => {
+      console.log('results--------', results);
+      if (results === undefined) {
+        models.Users.create(user);
+        res.redirect('/');
+      } else {
+        res.redirect('/signup');
+      }
+    })
+    .catch(err => {
+      console.error('error', err);
+    });
+});
 
 
 /************************************************************/
