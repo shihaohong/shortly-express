@@ -17,19 +17,18 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(cookieParser);
 app.use(Auth.createSession);
-
-
-app.get('/', 
+  
+app.get('/', Auth.verifySession,
 (req, res) => {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create', Auth.verifySession,
 (req, res) => {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links', Auth.verifySession,
 (req, res, next) => {
   models.Links.getAll()
     .then(links => {
@@ -40,7 +39,7 @@ app.get('/links',
     });
 });
 
-app.post('/links', 
+app.post('/links', Auth.verifySession,
 (req, res, next) => {
   var url = req.body.url;
   if (!models.Links.isValidUrl(url)) {
@@ -97,10 +96,9 @@ app.get('/signup', (req, res, next) => {
 });
 
 app.get('/logout', (req, res, next) => {
-  // delete the session
+  // delete the cookie
   res.clearCookie('shortlyid');
-    
-
+  // delete the session
   models.Sessions.delete({ hash: req.cookies['shortlyid'] })
     .then(session => {
       res.redirect('/login');
@@ -109,7 +107,6 @@ app.get('/logout', (req, res, next) => {
       console.error(err);
       res.redirect('/login');
     });
-  // then, delete the cookie
 });
 
 app.post('/login', (req, res, next) => {
@@ -124,8 +121,10 @@ app.post('/login', (req, res, next) => {
         var isPasswordCorrect = models.Users.compare(user.password, results.password, results.salt);
     
         if (isPasswordCorrect) {
-          // call sessions somehow over here to check user's cookies or creates a cookie for the user
-          res.redirect('/');
+          models.Sessions.update({ hash: req.cookies['shortlyid'] }, { userId: results.id })
+            .then(session => {
+              res.redirect('/');
+            });          
         } else {
           res.redirect('/login');
         }
@@ -145,15 +144,21 @@ app.post('/signup', (req, res, next) => {
   models.Users.get({ username: user.username })
     .then(results => {
       if (results === undefined) {
-        models.Users.create(user);
-        res.redirect('/');
+        return models.Users.create(user);
       } else {
-        res.redirect('/signup');
+        throw results;
       }
     })
-    .catch(err => {
-      console.error('error', err);
-      res.end();
+    .then((newUser) => {
+      return models.Sessions.update({ hash: req.session.hash }, { userId: newUser.insertId });
+    })
+    .then((session) => {
+      res.redirect('/');
+      next();
+    })
+    .catch(results => {
+      res.redirect('/signup');
+      next();
     });
 });
 

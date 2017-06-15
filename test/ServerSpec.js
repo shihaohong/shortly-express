@@ -587,6 +587,7 @@ describe('', function() {
 
           var cookies = cookieJar.getCookies('http://127.0.0.1:4568/');
           var newCookieValue = cookies[0].value;
+
           expect(cookieValue).to.not.equal(newCookieValue);
 
           var queryString = 'SELECT * FROM sessions WHERE hash = ?';
@@ -627,7 +628,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Link creation:', function() {
+  describe('Link creation:', function() {
 
     var cookies = request.jar();
     var requestWithSession = request.defaults({ jar: cookies });
@@ -640,7 +641,7 @@ describe('', function() {
       }
     };
 
-    xbeforeEach(function(done) {
+    beforeEach(function(done) {
       var options = {
         'method': 'POST',
         'followAllRedirects': true,
