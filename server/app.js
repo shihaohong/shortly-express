@@ -4,8 +4,8 @@ const utils = require('./lib/hashUtils');
 const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
+const cookieParser = require('./middleware/cookieParser');
 const models = require('./models');
-
 const app = express();
 
 app.set('views', `${__dirname}/views`);
@@ -15,6 +15,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
+app.use(cookieParser);
+app.use(Auth.createSession);
 
 
 app.get('/', 
@@ -94,6 +96,47 @@ app.get('/signup', (req, res, next) => {
   res.render('signup');
 });
 
+app.get('/logout', (req, res, next) => {
+  // delete the session
+  res.clearCookie('shortlyid');
+    
+
+  models.Sessions.delete({ hash: req.cookies['shortlyid'] })
+    .then(session => {
+      res.redirect('/login');
+    })
+    .catch(err => {
+      console.error(err);
+      res.redirect('/login');
+    });
+  // then, delete the cookie
+});
+
+app.post('/login', (req, res, next) => {
+  var user = req.body; // stores user data
+
+  models.Users.get({ username: user.username })
+    .then(results => {
+      if (results === undefined) {
+        res.redirect('/login');
+      } else {
+        // validate password since user does exist
+        var isPasswordCorrect = models.Users.compare(user.password, results.password, results.salt);
+    
+        if (isPasswordCorrect) {
+          // call sessions somehow over here to check user's cookies or creates a cookie for the user
+          res.redirect('/login');
+        } else {
+          res.redirect('/login');
+        }
+      }
+    })
+    .catch(err => {
+      console.error('error', err);
+      res.end();
+    });
+
+});
 
 app.post('/signup', (req, res, next) => {
   var user = req.body; // stores user data
@@ -110,33 +153,11 @@ app.post('/signup', (req, res, next) => {
     })
     .catch(err => {
       console.error('error', err);
+      res.end();
     });
 });
 
-app.post('/login', (req, res, next) => {
-  var user = req.body; // stores user data
 
-  models.Users.get({ username: user.username })
-    .then(results => {
-      if (results === undefined) {
-        res.redirect('/login');
-      } else {
-        // validate password since user does exist
-        var isPasswordCorrect = models.Users.compare(user.password, results.password, results.salt);
-    
-        if (isPasswordCorrect) {
-          // call sessions somehow over here to check user's cookies or creates a cookie for the user
-          res.redirect('/');
-        } else {
-          res.redirect('/login');
-        }
-      }
-    })
-    .catch(err => {
-      console.error('error', err);
-    });
-
-});
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
 // assume the route is a short code and try and handle it here.

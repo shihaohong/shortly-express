@@ -38,7 +38,7 @@ module.exports = (db) => {
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           hash VARCHAR(64),
           salt VARCHAR(64),
-          userAgent VARCHAR(64),
+          userAgent VARCHAR(255),
           userId INT
         )`);
     })
