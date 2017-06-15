@@ -22,6 +22,8 @@ class Users extends Model {
 
     return super.create.call(this, newUser);
   }
+
+  
 }
 
 module.exports = new Users();

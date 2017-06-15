@@ -77,6 +77,24 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+
+// DO SOMETHING HERE FOR AUTH.JS
+  // analyze cookies here
+
+  // if cookie matches a session, log into user automatically
+  // redirect to index
+
+  // else, just stay in login
+
+app.get('/login', (req, res, next) => {
+  res.render('login');
+});
+
+app.get('/signup', (req, res, next) => {
+  res.render('signup');
+});
+
+
 app.post('/signup', (req, res, next) => {
   var user = req.body; // stores user data
 
@@ -107,6 +125,7 @@ app.post('/login', (req, res, next) => {
         var isPasswordCorrect = models.Users.compare(user.password, results.password, results.salt);
     
         if (isPasswordCorrect) {
+          // call sessions somehow over here to check user's cookies or creates a cookie for the user
           res.redirect('/');
         } else {
           res.redirect('/login');
