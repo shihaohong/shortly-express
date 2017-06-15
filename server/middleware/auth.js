@@ -22,7 +22,6 @@ module.exports.createSession = (req, res, next) => {
       .then(session => {
         req.session = session;
         res.cookie('shortlyid', session.hash);
-
         next();
       }).catch(err => {
         console.error(err);
@@ -42,7 +41,6 @@ module.exports.createSession = (req, res, next) => {
             .then(session => {
               req.session = session;
               res.cookie('shortlyid', session.hash);
-              res.end();
               next();
             })
             .catch(err => {

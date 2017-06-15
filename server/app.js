@@ -125,7 +125,7 @@ app.post('/login', (req, res, next) => {
     
         if (isPasswordCorrect) {
           // call sessions somehow over here to check user's cookies or creates a cookie for the user
-          res.redirect('/login');
+          res.redirect('/');
         } else {
           res.redirect('/login');
         }
