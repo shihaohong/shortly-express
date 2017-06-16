@@ -79,14 +79,6 @@ app.post('/links', Auth.verifySession,
 // Write your authentication routes here
 /************************************************************/
 
-// DO SOMETHING HERE FOR AUTH.JS
-  // analyze cookies here
-
-  // if cookie matches a session, log into user automatically
-  // redirect to index
-
-  // else, just stay in login
-
 app.get('/login', (req, res, next) => {
   res.render('login');
 });
